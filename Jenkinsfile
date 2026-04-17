@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "yourdockerhubusername/app"
+        DOCKER_IMAGE = "gayaskhan1/app"
         SONARQUBE_SERVER = "SonarQube"
     }
 
