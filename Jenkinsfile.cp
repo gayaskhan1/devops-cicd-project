@@ -8,35 +8,29 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/gayaskhan1/devops-cicd-project.git'
-            }
-        }
+  stage('Checkout Code') {
+    steps {
+        git branch: 'main',
+            url: 'https://github.com/gayaskhan1/devops-cicd-project.git'
+      }
+  }
 
         stage('Build Application') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'mvn clean package'
-                }
+                sh 'mvn clean package'
             }
         }
 
         stage('Build Test') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'mvn test'
-                }
+                sh 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('devops-cicd-project') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh 'mvn sonar:sonar'
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
@@ -51,9 +45,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'docker build -t $DOCKER_IMAGE .'
-                }
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
