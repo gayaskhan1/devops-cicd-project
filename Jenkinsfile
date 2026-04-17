@@ -6,7 +6,6 @@ pipeline {
         SONARQUBE_SERVER = "SonarQube"
     }
 
-
     stages {
 
         stage('Clean Workspace') {
@@ -15,8 +14,6 @@ pipeline {
             }
         }
 
-    stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -24,60 +21,22 @@ pipeline {
             }
         }
 
-        // 🔍 DEBUG STAGE (VERY IMPORTANT)
-        stage('Debug Structure') {
-            steps {
-                sh 'pwd'
-                sh 'ls -R'
-            }
-        }
-
-        // 🔥 AUTO-DETECT POM LOCATION
-        stage('Find POM Location') {
-            steps {
-                script {
-                    POM_PATH = sh(
-                        script: "find . -name pom.xml | head -n 1",
-                        returnStdout: true
-                    ).trim()
-
-                    echo "POM FOUND AT: ${POM_PATH}"
-
-                    // Extract directory path
-                    APP_DIR = POM_PATH.replace('/pom.xml','')
-                    echo "APP DIRECTORY: ${APP_DIR}"
-                }
-            }
-        }
-
         stage('Build Application') {
             steps {
-                script {
-                    dir("${APP_DIR}") {
-                        sh 'mvn clean package'
-                    }
-                }
+                sh 'mvn clean package'
             }
         }
 
         stage('Build Test') {
             steps {
-                script {
-                    dir("${APP_DIR}") {
-                        sh 'mvn test'
-                    }
-                }
+                sh 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    dir("${APP_DIR}") {
-                        withSonarQubeEnv('SonarQube') {
-                            sh 'mvn sonar:sonar'
-                        }
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
@@ -92,11 +51,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    dir("${APP_DIR}") {
-                        sh 'docker build -t $DOCKER_IMAGE .'
-                    }
-                }
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
