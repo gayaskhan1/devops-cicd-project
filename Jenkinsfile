@@ -6,6 +6,15 @@ pipeline {
         SONARQUBE_SERVER = "SonarQube"
     }
 
+
+    stages {
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
     stages {
 
         stage('Checkout Code') {
