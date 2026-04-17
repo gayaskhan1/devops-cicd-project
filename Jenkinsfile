@@ -15,27 +15,59 @@ pipeline {
             }
         }
 
+        // 🔍 DEBUG STAGE (VERY IMPORTANT)
+        stage('Debug Structure') {
+            steps {
+                sh 'pwd'
+                sh 'ls -R'
+            }
+        }
+
+        // 🔥 AUTO-DETECT POM LOCATION
+        stage('Find POM Location') {
+            steps {
+                script {
+                    POM_PATH = sh(
+                        script: "find . -name pom.xml | head -n 1",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "POM FOUND AT: ${POM_PATH}"
+
+                    // Extract directory path
+                    APP_DIR = POM_PATH.replace('/pom.xml','')
+                    echo "APP DIRECTORY: ${APP_DIR}"
+                }
+            }
+        }
+
         stage('Build Application') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'mvn clean package'
+                script {
+                    dir("${APP_DIR}") {
+                        sh 'mvn clean package'
+                    }
                 }
             }
         }
 
         stage('Build Test') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'mvn test'
+                script {
+                    dir("${APP_DIR}") {
+                        sh 'mvn test'
+                    }
                 }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('devops-cicd-project') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh 'mvn sonar:sonar'
+                script {
+                    dir("${APP_DIR}") {
+                        withSonarQubeEnv('SonarQube') {
+                            sh 'mvn sonar:sonar'
+                        }
                     }
                 }
             }
@@ -51,8 +83,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('devops-cicd-project') {   // 👈 IMPORTANT FIX
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                script {
+                    dir("${APP_DIR}") {
+                        sh 'docker build -t $DOCKER_IMAGE .'
+                    }
                 }
             }
         }
